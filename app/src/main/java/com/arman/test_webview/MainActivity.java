@@ -5,14 +5,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentManager;
 
 import android.Manifest;
-import android.content.Entity;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
@@ -23,12 +21,16 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity implements PhantomGenerationFragment.PhanGenCallbacks{
-
-    LineChart lineChart;
+    LineChart MyChart;
+    ArrayList<Entry> MyFun =new ArrayList<>();
+    ArrayList<ILineDataSet> lineDataSets=new ArrayList<>();
+   // LineDataSet MylineDataSet = new LineDataSet(MyFun,"My Function");
 
     //**
     private static final String TAG_TASK_FRAGMENT = "task_fragment";
@@ -68,39 +70,21 @@ public class MainActivity extends AppCompatActivity implements PhantomGeneration
             fm.beginTransaction().add(mTaskFragment, TAG_TASK_FRAGMENT).commit();
         }
 
-        lineChart=(LineChart) findViewById(R.id.lineChart);
-        ArrayList<String> xAXES=new ArrayList<>();
-        ArrayList<Entry> yAXESsin=new ArrayList<>();
-        ArrayList<Entry> yAXEScos=new ArrayList<>();
-        double x=0;
-        int numDataPoints=100;
-        for(int i=0;i<numDataPoints;i++){
-            float sinFunction=Float.parseFloat(String.valueOf(Math.sin(x)));
-            float cosFunction=Float.parseFloat(String.valueOf(Math.cos(x)));
-            x = x+ 0.1;
-            yAXESsin.add(new Entry(sinFunction,i));
-            yAXEScos.add(new Entry(cosFunction,i));
-            xAXES.add(i,String.valueOf(x));
-        }
-        String[] xaxes =  new String[xAXES.size()];
-        for(int i=0;i<xAXES.size();i++){
-            xaxes[i]=xAXES.get(i).toString();
+        //MyChart =(LineChart) findViewById(R.id.lineChart);
+//        ArrayList<Entry> MyFun =new ArrayList<>();
+
+        /*for(float x=-6.14f;x<3.14f;x+=0.1f){
+            float sinFunction=Float.parseFloat(String.valueOf(Math.tan(x)));
+            MyFun.add(new Entry((float) x, sinFunction));
         }
         ArrayList<ILineDataSet> lineDataSets=new ArrayList<>();
+        LineDataSet MylineDataSet = new LineDataSet(MyFun,"My Function");
 
-        LineDataSet lineDataSet1 = new LineDataSet(yAXEScos,"cos");
-        lineDataSet1.setDrawCircles(false);
-        lineDataSet1.setColor(Color.BLUE);
+        MylineDataSet.setDrawCircles(false);
+        MylineDataSet.setColor(Color.BLUE);
 
-        LineDataSet lineDataSet2 = new LineDataSet(yAXESsin,"sin");
-        lineDataSet1.setDrawCircles(false);
-        lineDataSet1.setColor(Color.RED);
-
-        lineDataSets.add(lineDataSet1);
-        lineDataSets.add(lineDataSet2);
-
-        lineChart.setData(new LineData(lineDataSets));
-        lineChart.setVisibleXRangeMaximum(65f);
+        lineDataSets.add(MylineDataSet);
+        MyChart.setData(new LineData(lineDataSets));*/
 
     }
 
@@ -108,10 +92,45 @@ public class MainActivity extends AppCompatActivity implements PhantomGeneration
 
     @Override
     public void onProgressUpdate(String text) {
-       // Log.v(TAG, String.valueOf(999));
         TextView tv = (TextView)findViewById(R.id.TextField);
-        tv.setText(text.toString());
+        tv.setText(text);
         //TextField.setImageBitmap(slice_bitmap);
+
+        DrawMyChart(text);
+    }
+
+    public void DrawMyChart(String text){
+        int c_ounter=1;
+        Matcher DoubleFound;
+        //Log.v(TAG, String.valueOf(Double.valueOf(text)));
+        DoubleFound = Pattern.compile( "[-+]?\\d*\\.?\\d+([eE][-+]?\\d+)?" ).matcher( text );
+        float E=0,mu=0;
+        while ( DoubleFound.find() )
+        {
+            float element = Float.parseFloat( DoubleFound.group() );
+            if(c_ounter%3==1){
+                E=element;
+            }
+            if(c_ounter%3==2){
+                mu=element;
+            }
+
+            if((E!=0)&&(mu!=0)){
+                Log.v(TAG, String.valueOf(mu));
+                MyFun.add(new Entry((float) Math.log(E), (float) Math.log(mu)));
+                E=0;mu=0;
+            }
+
+            c_ounter++;
+
+        }
+
+        LineDataSet MylineDataSet = new LineDataSet(MyFun,"My Function");
+        MyChart =(LineChart) findViewById(R.id.lineChart);
+        MylineDataSet.setDrawCircles(false);
+        MylineDataSet.setColor(Color.BLUE);
+        lineDataSets.add(MylineDataSet);
+        MyChart.setData(new LineData(lineDataSets));
     }
 
     @Override

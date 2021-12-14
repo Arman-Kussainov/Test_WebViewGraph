@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.github.mikephil.charting.charts.LineChart;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -52,7 +54,7 @@ public class PhantomGenerationFragment extends Fragment {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    // read density rho data
+                    // find first data with +e
                     firstPlus = line.indexOf('+');
                     if(!(firstPlus<0)){
                         DoubleFound = Pattern.compile( "[-+]?\\d*\\.?\\d+([eE][-+]?\\d+)?" ).matcher( line );
@@ -60,13 +62,17 @@ public class PhantomGenerationFragment extends Fragment {
                         {
                             double element = Double.parseDouble( DoubleFound.group() );
                             myDoubles.add( element );
+                            text.append(element);
+                            text.append('\n');
+                            //PGCallbacks.onProgressUpdate(String.valueOf(element));
+
                         }
 
                         //    Log.v(TAG, line);
                         //    Log.v(TAG, String.valueOf(firstEplus));
                     }
-                    text.append(line);
-                    text.append('\n');
+                    //text.append(line);
+                    //text.append('\n');
                 }
                 try {
                     br.close();
@@ -77,10 +83,11 @@ public class PhantomGenerationFragment extends Fragment {
                 e.printStackTrace();
             }
 
-            for ( double element: myDoubles ){
-                Log.v(TAG, String.valueOf(element));
-
-            PGCallbacks.onProgressUpdate(text.toString());}
+            //for ( double element: myDoubles ){
+            //    Log.v(TAG, String.valueOf(element));
+            //Log.v(TAG, String.valueOf(text));
+            PGCallbacks.onProgressUpdate(text.toString());
+            //}
         }
 
     };
@@ -102,7 +109,6 @@ public class PhantomGenerationFragment extends Fragment {
         // OpenCVLoader.initDebug();
         // Retain this fragment across configuration changes.
         setRetainInstance(true); // does not really make a difference if it is even false
-
 
         Executor mSingleThreadExecutor = Executors.newSingleThreadExecutor();
         mSingleThreadExecutor.execute(PhantomGenerationTask);
